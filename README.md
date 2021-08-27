@@ -2,6 +2,31 @@
 
 This repository implements a simple wrapper API to query PICA+ records in PICA from SRU endpoints, so clients don't need to know about details of SRU specification or parsing XML.
 
+## Installation
+
+Install files from source:
+
+    git clone https://github.com/gbv/picasru-api.git
+
+Install dependencies. Requires Perl >= 5.14, cpanminus and local::lib.
+
+    eval $(perl -Mlocal::lib=local)
+    cpanm --installdeps --notest .
+
+You may first need to install system packages listed in `apt.txt`:
+
+    sudo xargs apt-get -y install < apt.txt
+
+Add a configuration file (see below).
+
+Deploy with pm2 to run service on port 4006 (modify `ecosystem.config.json` to change port if needed):
+
+    pm2 start ecosystem.config.json
+
+To update:
+
+    pm2 reload occurrences-api
+
 ## Configuration
 
 The `config/` directory must contain a Catmandu configuration file (`catmandu.yml`) with any number of SRU PICA Importers, e.g.:

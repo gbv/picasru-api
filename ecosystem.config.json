@@ -1,0 +1,5 @@
+{
+  "name": "picasru-api",
+  "script": "start.sh",
+  "interpreter": "bash"
+}
