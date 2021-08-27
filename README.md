@@ -40,3 +40,7 @@ Result format:
 
 Always returns a JSON object. On error there is a key `error`, otherwise there is a key `records` with
 an array of PICA records in PICA JSON format.
+
+## LICENSE
+
+MIT License.
