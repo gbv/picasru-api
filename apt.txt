@@ -1,3 +1,4 @@
 cpanminus
 libplack-perl
 libxml-libxml-perl
+libcatmandu-sru-perl

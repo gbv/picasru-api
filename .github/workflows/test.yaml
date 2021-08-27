@@ -23,5 +23,7 @@ jobs:
         with:
           perl-version: ${{ matrix.perl }}
       - run: perl -V
-      - run: cpanm --installdeps .
+      - name: Install Ubuntu packages
+        run: sudo xargs apt-get -y install < apt.txt
+      - run: cpanm --installdeps --notest .
       - run: prove -lv t        
