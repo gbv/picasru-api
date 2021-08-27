@@ -29,7 +29,7 @@ To update:
 
 ## Configuration
 
-The `config/` directory must contain a Catmandu configuration file (`catmandu.yml`) with any number of SRU PICA Importers, e.g.:
+The `config/` directory contains Catmandu configuration files with any number of SRU PICA Importers, e.g. add `catmandu.local.yml`:
 
 ~~~yaml
 importer:

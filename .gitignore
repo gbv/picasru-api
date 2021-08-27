@@ -1,4 +1,5 @@
 local/
 *.tdy
 *.bak
-config/catmandu.yml
+config/*
+!config/catmandu.yaml
