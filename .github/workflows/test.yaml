@@ -1,0 +1,28 @@
+name: Run tests
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+    branches: '*'
+
+
+jobs:
+  perl-job:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version:
+          - '5.32'
+          - '5.26'
+
+container:
+ image: perldocker/perl-tester:${{ matrix.perl-version }}
+ name: Perl ${{ matrix.perl-version }}
+ steps:
+   - uses: actions/checkout@v2
+   - name: run tests
+     run: |
+         cpanm --installdeps --notest .
+         prove -lv
