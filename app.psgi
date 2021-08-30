@@ -23,9 +23,11 @@ sub is_pica_sru_importer {
 $db = { map { ("$_" => $db->{$_}) } grep { is_pica_sru_importer($db->{$_}) } %$db };
 
 sub json_response {
-    state $JSON = JSON::PP->new->utf8;
-    
-    my $result = shift;
+    my ($result, %config) = @_;
+
+    my $JSON = JSON::PP->new->utf8;
+    $JSON = $JSON->pretty(1) if $config{pretty} // $result->{error};
+
     my $code = $result->{status} // ($result->{error} ? 500 : 200);
     $result = [$JSON->encode($result)];
 
@@ -76,12 +78,12 @@ sub {
     my $id = substr $req->path, 1;
 
     if ($id eq '') {
-        return json_response($db);
+        return json_response($db, pretty => 1);
     } elsif($db->{$id}) {
         if ($req->parameters->keys) {
             return json_response(query($id, $req->parameters));
         } else {
-            return json_response($db->{$id});
+            return json_response($db->{$id}, pretty => 1);
         }
     } else {
         return json_response({error => "not found", status => "400"});
