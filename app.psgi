@@ -54,10 +54,11 @@ sub query {
         $path = [];
     }   
 
-    my $config = { query => $query };
-    $config->{total} = $limit || 10;
+    my $config = { query => $query, total => $limit // 10 };
 
-    #if limit=0: parser: meta
+    if (defined $limit && $limit == 0) {
+        return query_count($id, $query);
+    }
 
     my ($error, $records);
     eval {
@@ -67,6 +68,27 @@ sub query {
     };
     if ($records) {
         return { records => $records };
+    } else {
+        $error //= $@ || "query failed";
+        return { error => ($error =~ s/ at .+//msr) };
+    }
+}
+
+sub query_count {
+    my ($id, $query) = @_;
+
+    my $config = { query => $query, %{$db->{$id}{options}}, parser => 'meta' };
+
+    my ($error, $result);
+    eval {
+        local $SIG{__WARN__} = sub { $error = shift };
+        $result = Catmandu->importer('SRU', $config)->next; 
+    };
+    if ($result) {
+        return {        
+            count => $result->{numberOfRecords},
+            url   => $result->{requestUrl},
+        }
     } else {
         $error //= $@ || "query failed";
         return { error => ($error =~ s/ at .+//msr) };
