@@ -68,6 +68,16 @@ is a key `records` with an array of PICA records in PICA JSON format unless
 `limit=0`. If `limit=0` the result contains no records but a key `count` with
 the number of records.
 
+## Examples
+
+See <https://pro4bib.github.io/pica/#/schnittstellen?id=sru> for a German description of querying PICA data via SRU.
+
+Some sample CQL queries tested with K10plus:
+
+* `pica.ppn=161165839X` get a record by its PPN
+* `pica.ddc=335.83092` get records by DDC numbers
+* `pica.ddc=335.83092 and (pica.jah=2014 or pica.jah=2015)` get records by DDC numbers and additional restriction on years
+
 ## LICENSE
 
 MIT License.
