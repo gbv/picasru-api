@@ -53,7 +53,7 @@ Get configuration of a selected database.
 
 ### GET /{dbkey}?params
 
-Perform an SRU searchRetrieve request and return the result set in JSON.
+Perform an SRU searchRetrieve request and return the result in a JSON object
 
 **Parameters:**
 
@@ -61,12 +61,12 @@ Perform an SRU searchRetrieve request and return the result set in JSON.
 * `limit`: optional maximum number of records to retrieve. Set to 10 by default.
 * `path`: optional comma-separated list of PICA-Fields (in PICA Path syntax) to reduce PICA records
 
-**Result format:**
+**Result object keys:**
 
-Always returns a JSON object. On error there is a key `error`, otherwise there
-is a key `records` with an array of PICA records in PICA JSON format unless
-`limit=0`. If `limit=0` the result contains no records but a key `count` with
-the number of records.
+* `error` on error
+* `query` the CQL query
+* `count` the number of records (if request parameter `limit=0`)
+* `records` an array of PICA records in PICA JSON format (unless `limit=0`)
 
 ## Examples
 

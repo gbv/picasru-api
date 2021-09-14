@@ -12,7 +12,7 @@ use Catmandu::Importer::SRU;
 
 Catmandu->load('./config');
 
-my $db = Catmandu->config->{importer};
+my $dbs = Catmandu->config->{importer};
 
 sub is_pica_sru_importer {
     $_[0]->{package} eq 'SRU' && $_[0]->{options}{parser} eq "picaxml"
@@ -20,13 +20,13 @@ sub is_pica_sru_importer {
 }
 
 # TODO: map to more useful (title, base...)
-$db = { map { ("$_" => $db->{$_}) } grep { is_pica_sru_importer($db->{$_}) } %$db };
+$dbs = { map { ("$_" => $dbs->{$_}) } grep { is_pica_sru_importer($dbs->{$_}) } %$dbs };
 
 sub json_response {
     my ($result, %config) = @_;
 
     my $JSON = JSON::PP->new->utf8;
-    $JSON = $JSON->pretty(1) if $config{pretty} // $result->{error};
+    $JSON = $JSON->pretty(1) if $config{pretty} // $result->{error} // $result->{count};
 
     my $code = $result->{status} // ($result->{error} ? 500 : 200);
     $result = [$JSON->encode($result)];
@@ -54,40 +54,30 @@ sub query {
         $path = [];
     }   
 
-    my $config = { query => $query, total => $limit // 10 };
+    my $count = defined $limit && $limit == 0;
 
-    if (defined $limit && $limit == 0) {
-        return query_count($id, $query);
-    }
+    my %config = ( query => $query, total => $limit // 10 );
+    $config{parser} = 'meta' if $count;
 
-    my ($error, $records);
+    my ($records, $meta, $error);
     eval {
-        my $importer = Catmandu->importer($id, $config);
+        my $importer = Catmandu->importer($id, \%config);
         local $SIG{__WARN__} = sub { $error = shift };
-        $records = $importer->map(sub {pica_fields($_[0],@$path)})->to_array; 
+        if ($count) {
+            my $result = $importer->next;
+            $meta = {
+                url   => $result->{requestUrl},            
+                count => $result->{numberOfRecords},
+            }
+        } else {
+            $records = $importer->map(sub {pica_fields($_[0],@$path)})->to_array; 
+        }
     };
-    if ($records) {
-        return { records => $records };
-    } else {
-        $error //= $@ || "query failed";
-        return { error => ($error =~ s/ at .+//msr) };
-    }
-}
-
-sub query_count {
-    my ($id, $query) = @_;
-
-    my $config = { query => $query, %{$db->{$id}{options}}, parser => 'meta' };
-
-    my ($error, $result);
-    eval {
-        local $SIG{__WARN__} = sub { $error = shift };
-        $result = Catmandu->importer('SRU', $config)->next; 
-    };
-    if ($result) {
+    if ($records || $meta) {
         return {        
-            count => $result->{numberOfRecords},
-            url   => $result->{requestUrl},
+            query => $query,
+            records => $records || [],
+            %{ $meta || {} },
         }
     } else {
         $error //= $@ || "query failed";
@@ -100,12 +90,12 @@ sub {
     my $id = substr $req->path, 1;
 
     if ($id eq '') {
-        return json_response($db, pretty => 1);
-    } elsif($db->{$id}) {
+        return json_response($dbs, pretty => 1);
+    } elsif($dbs->{$id}) {
         if ($req->parameters->keys) {
             return json_response(query($id, $req->parameters));
         } else {
-            return json_response($db->{$id}, pretty => 1);
+            return json_response($dbs->{$id}, pretty => 1);
         }
     } else {
         return json_response({error => "not found", status => "400"});
