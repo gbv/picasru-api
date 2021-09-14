@@ -1,4 +1,4 @@
-# picajson-sru
+# picasru-api
 
 This repository implements a simple wrapper API to query PICA+ records in PICA from SRU endpoints, so clients don't need to know about details of SRU specification or parsing XML.
 
@@ -25,7 +25,7 @@ Deploy with pm2 to run service on port 4006 (modify `ecosystem.config.json` to c
 
 To update:
 
-    pm2 reload occurrences-api
+    pm2 reload picasru-api
 
 ## Configuration
 
